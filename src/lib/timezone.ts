@@ -3,11 +3,12 @@ import { TZDate } from "@date-fns/tz";
 export const DEFAULT_CLINIC_TIMEZONE = "Africa/Cairo";
 
 export function getClinicTimezone() {
-  return (
+  const value = (
     process.env.CLINIC_TIMEZONE ||
     process.env.NEXT_PUBLIC_CLINIC_TIMEZONE ||
     DEFAULT_CLINIC_TIMEZONE
-  );
+  ).trim();
+  return value || DEFAULT_CLINIC_TIMEZONE;
 }
 
 export function parseYearMonthDay(date: string) {
