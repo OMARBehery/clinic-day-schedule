@@ -7,7 +7,6 @@ import {
   appointments,
   doctors,
   imagingStudies,
-  type AppointmentRow,
 } from "@/server/db/schema";
 
 export type AppointmentFilters = {
@@ -16,14 +15,21 @@ export type AppointmentFilters = {
   status?: AppointmentDto["status"];
 };
 
-function toDto(
-  row: AppointmentRow & {
-    doctorName: string;
-    imagingStudyId: string | null;
-    imagingModality: string | null;
-    imagingDescription: string | null;
-  },
-): AppointmentDto {
+function toDto(row: {
+  id: string;
+  patientName: string;
+  doctorId: string;
+  doctorName: string;
+  startsAt: Date;
+  durationMinutes: number;
+  status: AppointmentDto["status"];
+  reason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  imagingStudyId: string | null;
+  imagingModality: string | null;
+  imagingDescription: string | null;
+}): AppointmentDto {
   return {
     id: row.id,
     patientName: row.patientName,
