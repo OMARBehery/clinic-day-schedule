@@ -20,11 +20,19 @@ export class AppError extends Error {
 }
 
 export function isExclusionViolation(error: unknown) {
-  const code =
-    getErrorCode(error) ??
-    getErrorCode((error as { cause?: unknown }).cause) ??
-    getErrorCode((error as { originalError?: unknown }).originalError);
-  return code === "23P01";
+  const seen = new Set<unknown>();
+  let current: unknown = error;
+  while (current && typeof current === "object" && !seen.has(current)) {
+    seen.add(current);
+    const code = getErrorCode(current);
+    if (code === "23P01") {
+      return true;
+    }
+    current =
+      (current as { cause?: unknown }).cause ??
+      (current as { originalError?: unknown }).originalError;
+  }
+  return false;
 }
 
 function getErrorCode(error: unknown) {

@@ -12,7 +12,11 @@ async function migrate() {
     throw new Error("DATABASE_URL is not set");
   }
 
-  const sql = postgres(url, { max: 1 });
+  const sql = postgres(url, {
+    max: 1,
+    prepare: false,
+    ssl: url.includes("neon.tech") ? "require" : undefined,
+  });
   try {
     await sql`
       CREATE TABLE IF NOT EXISTS schema_migrations (

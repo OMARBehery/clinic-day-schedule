@@ -41,13 +41,14 @@ Application code is not the source of truth. Postgres enforces:
 ```sql
 EXCLUDE USING gist (
   doctor_id WITH =,
-  tstzrange(starts_at, starts_at + make_interval(mins => duration_minutes), '[)') WITH &&
+  tstzrange(starts_at, ends_at, '[)') WITH &&
 ) WHERE (status <> 'cancelled')
 ```
 
 - Range is **half-open** `[start, end)`, so an appointment ending at 10:30 may be followed by one starting at 10:30.
 - Cancelled rows are omitted from the constraint, so they do not occupy the doctor.
 - Two overlapping inserts in concurrent transactions: one commits, the other fails with SQLSTATE `23P01`.
+- `ends_at` is stored (not computed in the index) so the GiST expression stays `IMMUTABLE` on Postgres/Neon.
 - The API maps that to **HTTP 409** `{ error: { code: "APPOINTMENT_OVERLAP", details: { conflictingAppointmentId, ... } } }`.
 
 There is also a lookup after the violation so the UI can name the conflicting slot. That lookup is for messaging only; the constraint is what keeps the calendar correct.

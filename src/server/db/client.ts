@@ -16,10 +16,14 @@ function getDatabaseUrl() {
 
 export function getSql() {
   if (!globalForDb.postgres) {
-    globalForDb.postgres = postgres(getDatabaseUrl(), {
-      max: 10,
+    const url = getDatabaseUrl();
+    const neon = url.includes("neon.tech");
+    globalForDb.postgres = postgres(url, {
+      max: neon ? 1 : 10,
       idle_timeout: 20,
       connect_timeout: 15,
+      prepare: !neon,
+      ssl: neon ? "require" : undefined,
     });
   }
   return globalForDb.postgres;

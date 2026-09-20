@@ -27,6 +27,7 @@ export const appointments = pgTable("appointments", {
     .notNull()
     .references(() => doctors.id),
   startsAt: timestamp("starts_at", { withTimezone: true, mode: "date" }).notNull(),
+  endsAt: timestamp("ends_at", { withTimezone: true, mode: "date" }).notNull(),
   durationMinutes: integer("duration_minutes").notNull(),
   status: appointmentStatusEnum("status").notNull().default("scheduled"),
   reason: text("reason"),

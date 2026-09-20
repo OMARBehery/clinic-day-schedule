@@ -2,10 +2,25 @@ import { config } from "dotenv";
 import { getDb, getSql } from "./client";
 import { appointments, doctors, imagingStudies } from "./schema";
 import { DICOM_FIXTURE_PATH, seedIds } from "./ids";
-import { clinicLocalToUtc, todayInClinic } from "@/lib/timezone";
+import { addMinutes, clinicLocalToUtc, todayInClinic } from "@/lib/timezone";
 
 config({ path: ".env", quiet: true });
 config({ path: ".env.local", override: true, quiet: true });
+
+function appointmentValues(input: {
+  id: string;
+  patientName: string;
+  doctorId: string;
+  startsAt: Date;
+  durationMinutes: number;
+  status: "scheduled" | "checked_in" | "completed" | "cancelled";
+  reason: string;
+}) {
+  return {
+    ...input,
+    endsAt: addMinutes(input.startsAt, input.durationMinutes),
+  };
+}
 
 export async function seedDatabase() {
   const db = getDb();
@@ -22,7 +37,7 @@ export async function seedDatabase() {
   ]);
 
   await db.insert(appointments).values([
-    {
+    appointmentValues({
       id: seedIds.appointments.noraScan,
       patientName: "Nora El-Sayed",
       doctorId: seedIds.doctors.amira,
@@ -30,8 +45,8 @@ export async function seedDatabase() {
       durationMinutes: 30,
       status: "scheduled",
       reason: "CT chest follow-up (fictional)",
-    },
-    {
+    }),
+    appointmentValues({
       id: seedIds.appointments.karimFollowup,
       patientName: "Karim Adel",
       doctorId: seedIds.doctors.amira,
@@ -39,8 +54,8 @@ export async function seedDatabase() {
       durationMinutes: 30,
       status: "scheduled",
       reason: "Results review",
-    },
-    {
+    }),
+    appointmentValues({
       id: seedIds.appointments.laylaCheckin,
       patientName: "Layla Mostafa",
       doctorId: seedIds.doctors.amira,
@@ -48,8 +63,8 @@ export async function seedDatabase() {
       durationMinutes: 45,
       status: "checked_in",
       reason: "Ultrasound consult",
-    },
-    {
+    }),
+    appointmentValues({
       id: seedIds.appointments.yusufOrtho,
       patientName: "Yusuf Nabil",
       doctorId: seedIds.doctors.omar,
@@ -57,8 +72,8 @@ export async function seedDatabase() {
       durationMinutes: 30,
       status: "scheduled",
       reason: "Knee pain assessment",
-    },
-    {
+    }),
+    appointmentValues({
       id: seedIds.appointments.hanaCompleted,
       patientName: "Hana Ibrahim",
       doctorId: seedIds.doctors.omar,
@@ -66,8 +81,8 @@ export async function seedDatabase() {
       durationMinutes: 30,
       status: "completed",
       reason: "Post-op check",
-    },
-    {
+    }),
+    appointmentValues({
       id: seedIds.appointments.samiCancelled,
       patientName: "Sami Fawzy",
       doctorId: seedIds.doctors.omar,
@@ -75,8 +90,8 @@ export async function seedDatabase() {
       durationMinutes: 30,
       status: "cancelled",
       reason: "Patient rescheduled",
-    },
-    {
+    }),
+    appointmentValues({
       id: seedIds.appointments.raniaInternal,
       patientName: "Rania Tarek",
       doctorId: seedIds.doctors.lina,
@@ -84,7 +99,7 @@ export async function seedDatabase() {
       durationMinutes: 30,
       status: "scheduled",
       reason: "Annual physical",
-    },
+    }),
   ]);
 
   await db.insert(imagingStudies).values({

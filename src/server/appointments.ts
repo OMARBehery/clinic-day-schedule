@@ -100,7 +100,7 @@ async function findOverlappingAppointment(input: {
   const conditions = [
     eq(appointments.doctorId, input.doctorId),
     ne(appointments.status, "cancelled"),
-    sql`tstzrange(${appointments.startsAt}, ${appointments.startsAt} + (${appointments.durationMinutes}::text || ' minutes')::interval, '[)') && tstzrange(${input.startsAt}, ${rangeEnd}, '[)')`,
+    sql`tstzrange(${appointments.startsAt}, ${appointments.endsAt}, '[)') && tstzrange(${input.startsAt.toISOString()}::timestamptz, ${rangeEnd.toISOString()}::timestamptz, '[)')`,
   ];
   if (input.excludeId) {
     conditions.push(ne(appointments.id, input.excludeId));
@@ -158,6 +158,7 @@ export async function createAppointment(input: CreateAppointmentInput) {
         patientName: input.patientName,
         doctorId: input.doctorId,
         startsAt,
+        endsAt: addMinutes(startsAt, input.durationMinutes),
         durationMinutes: input.durationMinutes,
         reason: input.reason,
         status: "scheduled",

@@ -23,11 +23,13 @@ CREATE TABLE IF NOT EXISTS appointments (
   patient_name text NOT NULL,
   doctor_id uuid NOT NULL REFERENCES doctors(id),
   starts_at timestamptz NOT NULL,
+  ends_at timestamptz NOT NULL,
   duration_minutes integer NOT NULL CHECK (duration_minutes > 0),
   status appointment_status NOT NULL DEFAULT 'scheduled',
   reason text,
   created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CHECK (ends_at > starts_at)
 );
 
 CREATE TABLE IF NOT EXISTS imaging_studies (
@@ -51,14 +53,11 @@ ALTER TABLE appointments DROP CONSTRAINT IF EXISTS appointments_no_doctor_overla
 
 -- Adjacent appointments are allowed because the range is half-open [start, end).
 -- Cancelled rows are excluded so they do not occupy the doctor's calendar.
+-- ends_at is stored (not computed) so the GiST expression is IMMUTABLE.
 ALTER TABLE appointments
   ADD CONSTRAINT appointments_no_doctor_overlap
   EXCLUDE USING gist (
     doctor_id WITH =,
-    tstzrange(
-      starts_at,
-      starts_at + make_interval(mins => duration_minutes),
-      '[)'
-    ) WITH &&
+    tstzrange(starts_at, ends_at, '[)') WITH &&
   )
   WHERE (status <> 'cancelled');
