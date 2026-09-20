@@ -1,0 +1,140 @@
+openapi: 3.0.3
+info:
+  title: Clinic Day Schedule API
+  version: 0.1.0
+  description: Fictional clinic day board. Not a diagnostic system.
+servers:
+  - url: /
+paths:
+  /api/health:
+    get:
+      summary: Liveness
+      responses:
+        "200":
+          description: OK
+  /api/v1/doctors:
+    get:
+      summary: List doctors
+      responses:
+        "200":
+          description: Doctor collection
+  /api/v1/appointments:
+    get:
+      summary: List appointments for a clinic-local date
+      parameters:
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: doctorId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [scheduled, checked_in, completed, cancelled]
+      responses:
+        "200":
+          description: Appointment collection
+        "400":
+          description: Validation error
+    post:
+      summary: Create appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointment"
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Validation error
+        "409":
+          description: Overlap conflict
+  /api/v1/appointments/{id}/status:
+    patch:
+      summary: Update appointment status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [scheduled, checked_in, completed, cancelled]
+      responses:
+        "200":
+          description: Updated
+        "400":
+          description: Unsupported status
+        "409":
+          description: Overlap after status change
+  /api/v1/appointments/{id}/imaging-study:
+    get:
+      summary: Safe imaging metadata
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Metadata
+        "404":
+          description: No study
+  /api/v1/imaging-studies/{id}/file:
+    get:
+      summary: Raw DICOM bytes
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: application/dicom
+          content:
+            application/dicom:
+              schema:
+                type: string
+                format: binary
+components:
+  schemas:
+    CreateAppointment:
+      type: object
+      required: [patientName, doctorId, startsAt, durationMinutes]
+      properties:
+        patientName:
+          type: string
+        doctorId:
+          type: string
+          format: uuid
+        startsAt:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
