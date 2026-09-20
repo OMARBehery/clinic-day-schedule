@@ -3,7 +3,8 @@
 Fictional clinic staff board for **one day of appointments** and **one anonymized DICOM scan**.  
 This is a take-home engineering exercise, **not** a diagnostic or production medical system. All names are invented.
 
-**Demo:** [https://clinic-day-schedule.vercel.app](https://clinic-day-schedule.vercel.app)
+**Demo:** [https://clinic-day-schedule.vercel.app](https://clinic-day-schedule.vercel.app)  
+**Source:** [https://github.com/OMARBehery/clinic-day-schedule](https://github.com/OMARBehery/clinic-day-schedule)
 
 ## What it does
 
