@@ -39,3 +39,15 @@ Confirm `/api/health` returns `{ "ok": true }`.
 Open `/` and load today's board. If the database is empty, run seed against Neon again.
 
 Put the production URL at the top of the README.
+
+## 4. GitHub (optional for the live demo)
+
+The app is already on Vercel. To attach a GitHub remote from this machine:
+
+```bash
+gh auth login
+git branch -M main
+gh repo create clinic-day-schedule --private --source=. --remote=origin --push
+```
+
+Then connect the GitHub repo in the Vercel project settings if you want preview deploys on every push.
